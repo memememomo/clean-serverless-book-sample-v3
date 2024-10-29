@@ -1,0 +1,37 @@
+services:
+  go-test:
+    build:
+      context: ./
+      dockerfile: docker/golang/Dockerfile
+    volumes:
+      - ./app:/go/src/clean-serverless-book-sample/:cached
+    security_opt:
+      - seccomp:unconfined
+    depends_on:
+      - dynamodb-local
+    env_file:
+      - .env
+      - .env.dynamodb-local
+    networks:
+      - net
+
+  dynamodb-local:
+    build:
+      context: ./
+      dockerfile: docker/dynamo/Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/var/opt/
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - VOLUME=$PWD
+    env_file:
+      - .env
+      - .env.dynamodb-local
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
