@@ -144,3 +144,7 @@ func (f *Factory) BuildDeleteMicropost() usecase.IDeleteMicropost {
 		f.BuildGetMicropostByID(),
 		f.BuildMicropostOperator())
 }
+
+func (f *Factory) BuildCreateHelloMessage() usecase.ICreateHelloMessage {
+	return interactor.NewCreateHelloMessage()
+}

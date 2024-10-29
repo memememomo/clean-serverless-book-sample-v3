@@ -28,5 +28,10 @@ func Routes() *gin.Engine {
 	r.GET("/v1/users/:user_id/microposts/:micropost_id", micropostCtrl.GetMicropost)
 	r.PUT("/v1/users/:user_id/microposts/:micropost_id", micropostCtrl.PutMicropost)
 	r.DELETE("/v1/users/:user_id/microposts/:micropost_id", micropostCtrl.DeleteMicropost)
+
+	helloCtrl := &HelloController{
+		log: log,
+	}
+	r.POST("/v1/hello", helloCtrl.PostHello)
 	return r
 }
