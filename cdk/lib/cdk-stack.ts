@@ -1,9 +1,11 @@
 import {Architecture, DockerImageCode, DockerImageFunction} from "aws-cdk-lib/aws-lambda";
-import {Duration, RemovalPolicy, Stack, StackProps} from 'aws-cdk-lib';
-import {Construct} from 'constructs';
-import {LambdaIntegration, RestApi} from 'aws-cdk-lib/aws-apigateway';
-import {AttributeType, BillingMode, Table} from 'aws-cdk-lib/aws-dynamodb';
-import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam';
+import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { RestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
+import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {Bucket, EventType} from 'aws-cdk-lib/aws-s3';
+import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import * as dotenv from 'dotenv';
 
 dotenv.config({path: '../.env'});
@@ -19,6 +21,11 @@ export class CdkStack extends Stack {
       tableName: process.env.DYNAMO_TABLE_NAME,
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    // S3 Bucket
+    const bucket = new Bucket(this, 'CleanServerlessTestBucket', {
+      bucketName: 'clean-serverless-test',
     });
 
     // API Gateway
@@ -78,5 +85,31 @@ export class CdkStack extends Stack {
       }));
       addApiIntegration(apiPath, method, lambdaFunction);
     });
+
+    // Create S3 Event Handler Lambda
+    const s3HandlerFunction = createLambdaFunction('s3event', 's3Handler');
+
+    // Grant S3 permissions to the handler
+    bucket.grantReadWrite(s3HandlerFunction);
+
+    // Add DynamoDB permissions
+    dynamoTable.grantFullAccess(s3HandlerFunction);
+
+    // Add additional permissions if needed
+    s3HandlerFunction.addToRolePolicy(new PolicyStatement({
+      actions: ['dynamodb:*', 'logs:*'],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+
+    // Add S3 event notification
+    bucket.addEventNotification(
+        EventType.OBJECT_CREATED,
+        new LambdaDestination(s3HandlerFunction)
+    );
+    bucket.addEventNotification(
+        EventType.OBJECT_REMOVED,
+        new LambdaDestination(s3HandlerFunction)
+    );
   }
 }
