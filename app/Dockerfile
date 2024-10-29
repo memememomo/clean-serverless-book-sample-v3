@@ -7,3 +7,8 @@ RUN scripts/build-handlers.sh
 FROM public.ecr.aws/lambda/provided:al2023 AS api
 COPY --from=build /go/src/clean-serverless-book-sample/adapter/handlers/api/main ./main
 ENTRYPOINT [ "./main" ]
+
+
+FROM public.ecr.aws/lambda/provided:al2023 AS schedule
+COPY --from=build /go/src/clean-serverless-book-sample/adapter/handlers/schedule/main ./main
+ENTRYPOINT [ "./main" ]

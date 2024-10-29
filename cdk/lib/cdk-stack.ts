@@ -1,9 +1,11 @@
-import {Architecture, DockerImageCode, DockerImageFunction} from "aws-cdk-lib/aws-lambda";
-import {Duration, RemovalPolicy, Stack, StackProps} from 'aws-cdk-lib';
-import {Construct} from 'constructs';
-import {LambdaIntegration, RestApi} from 'aws-cdk-lib/aws-apigateway';
-import {AttributeType, BillingMode, Table} from 'aws-cdk-lib/aws-dynamodb';
-import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam';
+import { Architecture, DockerImageCode, DockerImageFunction } from "aws-cdk-lib/aws-lambda";
+import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { RestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
+import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import * as dotenv from 'dotenv';
 
 dotenv.config({path: '../.env'});
@@ -78,5 +80,19 @@ export class CdkStack extends Stack {
       }));
       addApiIntegration(apiPath, method, lambdaFunction);
     });
+
+    // Schedule Event Handler
+    const scheduleHandler = createLambdaFunction('schedule', 'scheduleHandler');
+    scheduleHandler.addToRolePolicy(new PolicyStatement({
+      actions: ['logs:*'],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+
+    // Create EventBridge Rule
+    const eventRule = new Rule(this, 'ScheduleRule', {
+      schedule: Schedule.rate(Duration.minutes(5)),
+    });
+    eventRule.addTarget(new LambdaFunction(scheduleHandler));
   }
 }
