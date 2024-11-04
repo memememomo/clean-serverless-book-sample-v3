@@ -14,3 +14,7 @@ mainブランチの他に、以下のブランチがあります。
 | new-model | 「第4章 Modelを新たに追加する」の変更内容が含まれています。 |
 | s3event   | 「5.2 S3イベントを処理する」の変更内容が含まれています。   |
 | schedule  | 「5.3 定期的な実行を実装する」の変更内容が含まれています。  |
+
+# 正誤表
+
+https://github.com/memememomo/clean-serverless-book-sample-v3/wiki
