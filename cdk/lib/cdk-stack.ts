@@ -64,8 +64,7 @@ export class CdkStack extends Stack {
       { name: 'postMicroposts', method: 'POST', apiPath: '/v1/users/{user_id}/microposts' },
       { name: 'postUsers', method: 'POST', apiPath: '/v1/users' },
       { name: 'putMicropost', method: 'PUT', apiPath: '/v1/users/{user_id}/microposts/{micropost_id}' },
-      { name: 'putUser', method: 'PUT', apiPath: '/v1/users/{user_id}' },
-      { name: 'hello', method: 'POST', apiPath: '/v1/hello' },
+      { name: 'putUser', method: 'PUT', apiPath: '/v1/users/{user_id}' }
     ];
 
     // Create Lambda functions and integrate them with API Gateway
